@@ -1,3 +1,3 @@
 """
-Mitsubishi136 IR climate for Mitsubishi 136‑bit ACs.
+Mitsubishi 136‑bit IR climate component.
 """

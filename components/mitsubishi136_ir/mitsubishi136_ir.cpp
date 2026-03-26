@@ -5,6 +5,7 @@ namespace mitsubishi136_ir {
 
 using namespace climate;
 
+
 void Mitsubishi136IRClimate::setup() {
   ac_ = new IRMitsubishi136(ir_pin_);
   ac_->begin();
@@ -21,7 +22,7 @@ void Mitsubishi136IRClimate::setup() {
 
 void Mitsubishi136IRClimate::dump_config() {
   LOG_CLIMATE("", "Mitsubishi136 IR Climate", this);
-  ESP_LOGCONFIG(TAG, "  IR pin: %u", this->ir_pin_);
+  ESP_LOGCONFIG(TAG, "IR pin: %u", this->ir_pin_);
 }
 
 ClimateTraits Mitsubishi136IRClimate::traits() {
@@ -29,6 +30,8 @@ ClimateTraits Mitsubishi136IRClimate::traits() {
 
   traits.set_supports_current_temperature(false);
   traits.set_supports_two_point_target_temperature(false);
+  traits.set_supports_action(false);
+  traits.set_supports_away(false);
 
   traits.set_supported_modes({
     ClimateMode::CLIMATE_MODE_OFF,
@@ -106,12 +109,19 @@ void Mitsubishi136IRClimate::control(const ClimateCall &call) {
 
   if (call.get_target_temperature().has_value()) {
     float temp = *call.get_target_temperature();
+    temp = std:max(temp, 16.0f);
+    temp = std::min(temp, 30.0f);
     this->target_temperature = temp;
     ac_->setTemp((uint8_t) temp);
   }
 
   ac_->send();
   this->publish_state();
+}
+
+// Tell ESPHome the platform name for climate
+Climate *get_climate_mitsubishi136_ir() {
+  return new Mitsubishi136IRClimate();
 }
 
 }  // namespace mitsubishi136_ir
