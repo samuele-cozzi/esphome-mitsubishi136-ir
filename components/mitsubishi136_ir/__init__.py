@@ -1,3 +1,3 @@
 """
-Mitsubishi 136‑bit IR climate component.
+Mitsubishi136 IR climate component.
 """
