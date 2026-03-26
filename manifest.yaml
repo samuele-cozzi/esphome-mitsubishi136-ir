@@ -1,0 +1,11 @@
+name: mitsubishi136_ir
+version: 0.1.0
+short_description: Climate component for Mitsubishi 136‑bit IR ACs (e.g. SEZ‑KD)
+documentation: https://github.com/samuele-cozzi/esphome-mitsubishi136-ir
+authors:
+  - Samuele Cozzi <samuele.cozzi@gmail.com>
+url: https://github.com/samuele-cozzi/esphome-mitsubishi136-ir
+min_esphome_version: 2025.6.0
+dependencies:
+  - IRremoteESP8266
+  - https://github.com/crankyoldgit/IRremoteESP8266
