@@ -1,5 +1,7 @@
+file(GLOB_RECURSE SOURCES "*.cpp")
+
 idf_component_register(
-    SRC_DIRS "."
+    SRCS ${SOURCES}
     INCLUDE_DIRS "."
     PRIV_REQUIRES "ir_transmitter"
 )
