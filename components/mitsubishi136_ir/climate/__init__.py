@@ -27,6 +27,9 @@ CONFIG_SCHEMA = cv.All(
 
 async def to_code(config):
     """Generate C++ code for the climate platform."""
+    # Add the include for the header file
+    cg.add_include("mitsubishi136_ir/mitsubishi136_ir.h")
+    
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await climate.register_climate(var, config)
