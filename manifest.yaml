@@ -6,6 +6,5 @@ authors:
   - Samuele Cozzi <samuele.cozzi@gmail.com>
 url: https://github.com/samuele-cozzi/esphome-mitsubishi136-ir
 min_esphome_version: 2025.6.0
-dependencies:
-  - IRremoteESP8266
-  - https://github.com/crankyoldgit/IRremoteESP8266
+requirements:
+  - IRremoteESP8266@~1.12.2
