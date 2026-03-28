@@ -9,7 +9,7 @@ from .. import mitsubishi136_ir_ns
 
 CODEOWNERS = ["@samuele-cozzi"]
 
-# Declare the class as a Climate component
+# Forward declare the class
 Mitsubishi136IRClimate = mitsubishi136_ir_ns.class_(
     "Mitsubishi136IRClimate", climate.Climate
 )
