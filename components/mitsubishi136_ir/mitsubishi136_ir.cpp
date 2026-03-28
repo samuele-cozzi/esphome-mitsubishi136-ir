@@ -1,7 +1,6 @@
 #include "mitsubishi136_ir.h"
 #include "esphome/core/log.h"
 #include "esphome/components/climate/climate_mode.h"
-#include <Arduino.h>
 
 namespace esphome {
 namespace mitsubishi136_ir {
@@ -9,23 +8,13 @@ namespace mitsubishi136_ir {
 static const char *const TAG = "mitsubishi136_ir.climate";
 
 void Mitsubishi136IRClimate::setup() {
-  ESP_LOGI(TAG, "Setting up Mitsubishi136 IR Climate on GPIO %d", this->ir_pin_);
-
-  // ── Hardware pin test ──────────────────────────────────────────────────────
-  // Pulse the IR LED 3× at boot (visible on a phone camera) to confirm the
-  // LED is actually connected to the configured GPIO before the RMT takes over.
-  pinMode(static_cast<uint8_t>(this->ir_pin_), OUTPUT);
-  for (int i = 0; i < 3; i++) {
-    digitalWrite(static_cast<uint8_t>(this->ir_pin_), HIGH);
-    delay(200);
-    digitalWrite(static_cast<uint8_t>(this->ir_pin_), LOW);
-    delay(200);
-  }
-  ESP_LOGI(TAG, "GPIO %d blink test done — check camera for 3 IR flashes", this->ir_pin_);
+  ESP_LOGI(TAG, "Setting up Mitsubishi136 IR Climate — GPIO %d, inverted: %s",
+           this->ir_pin_, this->ir_inverted_ ? "yes" : "no");
 
   this->ac_ = new IRMitsubishi136(static_cast<uint16_t>(this->ir_pin_), this->ir_inverted_);
   this->ac_->begin();
-  ESP_LOGI(TAG, "IR transmitter initialised (inverted=%s)", this->ir_inverted_ ? "yes" : "no");
+
+  ESP_LOGI(TAG, "IR transmitter ready");
 
   this->mode = climate::CLIMATE_MODE_OFF;
   this->target_temperature = 24.0f;
@@ -71,18 +60,18 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
   if (call.get_fan_mode().has_value())
     this->fan_mode = *call.get_fan_mode();
 
-  ESP_LOGI(TAG, "control() called: mode=%d temp=%.1f fan=%d",
+  ESP_LOGI(TAG, "control() — mode=%d temp=%.1f fan=%d",
            static_cast<int>(this->mode), this->target_temperature,
            static_cast<int>(this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)));
 
-  if (ac_ == nullptr) {
+  if (this->ac_ == nullptr) {
     ESP_LOGE(TAG, "IR transmitter not initialised! Did setup() run?");
     return;
   }
 
   // ── Power ────────────────────────────────────────────────────────────────
   if (this->mode == climate::CLIMATE_MODE_OFF) {
-    ESP_LOGI(TAG, "Sending OFF");
+    ESP_LOGI(TAG, "Sending power OFF");
     this->ac_->off();
   } else {
     this->ac_->on();
@@ -127,14 +116,14 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
     // ── Temperature ──────────────────────────────────────────────────────
     this->ac_->setTemp(static_cast<uint8_t>(this->target_temperature));
 
-    ESP_LOGI(TAG, "Sending IR frame: mode=%d temp=%.1f fan=%d",
+    ESP_LOGI(TAG, "IR frame: mode=%d temp=%.1f fan=%d",
              static_cast<int>(this->mode), this->target_temperature,
              static_cast<int>(this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)));
   }
 
-  ESP_LOGI(TAG, "Calling ac_->send() on GPIO %d", this->ir_pin_);
+  ESP_LOGI(TAG, "Calling send() on GPIO %d", this->ir_pin_);
   this->ac_->send();
-  ESP_LOGI(TAG, "ac_->send() completed");
+  ESP_LOGI(TAG, "send() completed");
 
   this->publish_state();
 }
