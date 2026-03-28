@@ -29,7 +29,6 @@ CONFIG_SCHEMA = cv.All(
 async def to_code(config):
     """Generate C++ code for the climate platform."""
     var = cg.new_Pvariable(config[CONF_ID])
-    await cg.register_component(var, config)
     await climate.register_climate(var, config)
     
     # Set IR pin
