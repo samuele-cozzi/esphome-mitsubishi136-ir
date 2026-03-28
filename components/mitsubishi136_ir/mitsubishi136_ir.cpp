@@ -8,8 +8,10 @@ namespace mitsubishi136_ir {
 static const char *const TAG = "mitsubishi136_ir.climate";
 
 void Mitsubishi136IRClimate::setup() {
-  this->ac_ = new IRMitsubishi136(this->ir_pin_);
+  ESP_LOGI(TAG, "Setting up Mitsubishi136 IR Climate on GPIO %d", this->ir_pin_);
+  this->ac_ = new IRMitsubishi136(static_cast<uint16_t>(this->ir_pin_));
   this->ac_->begin();
+  ESP_LOGI(TAG, "IR transmitter initialised");
 
   this->mode = climate::CLIMATE_MODE_OFF;
   this->target_temperature = 24.0f;
@@ -54,8 +56,18 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
   if (call.get_fan_mode().has_value())
     this->fan_mode = *call.get_fan_mode();
 
+  ESP_LOGI(TAG, "control() called: mode=%d temp=%.1f fan=%d",
+           static_cast<int>(this->mode), this->target_temperature,
+           static_cast<int>(this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)));
+
+  if (ac_ == nullptr) {
+    ESP_LOGE(TAG, "IR transmitter not initialised! Did setup() run?");
+    return;
+  }
+
   // ── Power ────────────────────────────────────────────────────────────────
   if (this->mode == climate::CLIMATE_MODE_OFF) {
+    ESP_LOGI(TAG, "Sending OFF");
     this->ac_->off();
   } else {
     this->ac_->on();
@@ -99,13 +111,16 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
 
     // ── Temperature ──────────────────────────────────────────────────────
     this->ac_->setTemp(static_cast<uint8_t>(this->target_temperature));
+
+    ESP_LOGI(TAG, "Sending IR frame: mode=%d temp=%.1f fan=%d",
+             static_cast<int>(this->mode), this->target_temperature,
+             static_cast<int>(this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)));
   }
 
-  ESP_LOGD(TAG, "Sending IR: mode=%d temp=%.1f fan=%d",
-           static_cast<int>(this->mode), this->target_temperature,
-           static_cast<int>(this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)));
-
+  ESP_LOGI(TAG, "Calling ac_->send() on GPIO %d", this->ir_pin_);
   this->ac_->send();
+  ESP_LOGI(TAG, "ac_->send() completed");
+
   this->publish_state();
 }
 
