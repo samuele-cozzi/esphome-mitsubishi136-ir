@@ -11,9 +11,7 @@ CODEOWNERS = ["@samuele-cozzi"]
 
 # Declare the class as a Climate component
 Mitsubishi136IRClimate = mitsubishi136_ir_ns.class_(
-    "Mitsubishi136IRClimate",
-    climate.Climate,
-    includes=["mitsubishi136_ir/mitsubishi136_ir.h"],
+    "Mitsubishi136IRClimate", climate.Climate
 )
 
 CONF_IR_PIN = "ir_pin"
@@ -30,6 +28,9 @@ CONFIG_SCHEMA = cv.All(
 
 async def to_code(config):
     """Generate C++ code for the climate platform."""
+    # Register source files
+    cg.add_source_file("mitsubishi136_ir/mitsubishi136_ir.cpp")
+    
     var = cg.new_Pvariable(config[CONF_ID])
     await climate.register_climate(var, config)
     
