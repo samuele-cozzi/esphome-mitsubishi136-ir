@@ -2,9 +2,9 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/climate/climate.h"
-
-// Forward declaration — full definition included only in the .cpp
-class IRMitsubishi136;
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Mitsubishi.h>
 
 namespace esphome {
 namespace mitsubishi136_ir {
