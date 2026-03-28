@@ -21,7 +21,6 @@ void Mitsubishi136IRClimate::dump_config() {
 
 climate::ClimateTraits Mitsubishi136IRClimate::traits() {
   auto traits = climate::ClimateTraits();
-
   traits.set_supports_current_temperature(true);
   traits.set_supported_modes({
       climate::CLIMATE_MODE_OFF,
@@ -40,7 +39,6 @@ climate::ClimateTraits Mitsubishi136IRClimate::traits() {
   traits.set_visual_min_temperature(16.0f);
   traits.set_visual_max_temperature(30.0f);
   traits.set_visual_temperature_step(1.0f);
-
   return traits;
 }
 
