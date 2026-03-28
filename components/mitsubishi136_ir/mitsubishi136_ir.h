@@ -1,4 +1,3 @@
-// components/mitsubishi136_ir/mitsubishi136_ir.h
 #pragma once
 
 #include "esphome/core/component.h"
