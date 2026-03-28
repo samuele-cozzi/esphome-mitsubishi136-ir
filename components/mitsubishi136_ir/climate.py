@@ -4,7 +4,7 @@ import esphome.config_validation as cv
 from esphome.components import climate
 from esphome.const import CONF_ID
 
-from .. import mitsubishi136_ir_ns
+from . import mitsubishi136_ir_ns
 
 AUTO_LOAD = ["climate"]
 
@@ -27,7 +27,6 @@ CONFIG_SCHEMA = (
     )
     .extend(cv.COMPONENT_SCHEMA)
 )
-
 
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
