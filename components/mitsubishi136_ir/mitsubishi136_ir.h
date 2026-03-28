@@ -2,9 +2,7 @@
 
 #include "esphome/core/component.h"
 #include "esphome/components/climate/climate.h"
-#include <IRremoteESP8266.h>
-#include <IRsend.h>
-#include <ir_Mitsubishi.h>
+#include "ir_Mitsubishi.h"
 
 namespace esphome {
 namespace mitsubishi136_ir {
