@@ -33,4 +33,4 @@ async def to_code(config):
     await cg.register_component(var, config)
     await climate.register_climate(var, config)
     cg.add(var.set_ir_pin(config[CONF_IR_PIN]))
-    cg.add_library("IRremoteESP8266", "2.9.0")
+    cg.add_library("crankyoldgit/IRremoteESP8266", "2.9.0")
