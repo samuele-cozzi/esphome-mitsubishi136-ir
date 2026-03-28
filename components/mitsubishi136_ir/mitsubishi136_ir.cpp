@@ -1,6 +1,7 @@
 #include "mitsubishi136_ir.h"
 #include "esphome/core/log.h"
 #include "esphome/components/climate/climate_mode.h"
+#include <Arduino.h>
 
 namespace esphome {
 namespace mitsubishi136_ir {
@@ -9,9 +10,22 @@ static const char *const TAG = "mitsubishi136_ir.climate";
 
 void Mitsubishi136IRClimate::setup() {
   ESP_LOGI(TAG, "Setting up Mitsubishi136 IR Climate on GPIO %d", this->ir_pin_);
-  this->ac_ = new IRMitsubishi136(static_cast<uint16_t>(this->ir_pin_));
+
+  // ── Hardware pin test ──────────────────────────────────────────────────────
+  // Pulse the IR LED 3× at boot (visible on a phone camera) to confirm the
+  // LED is actually connected to the configured GPIO before the RMT takes over.
+  pinMode(static_cast<uint8_t>(this->ir_pin_), OUTPUT);
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(static_cast<uint8_t>(this->ir_pin_), HIGH);
+    delay(200);
+    digitalWrite(static_cast<uint8_t>(this->ir_pin_), LOW);
+    delay(200);
+  }
+  ESP_LOGI(TAG, "GPIO %d blink test done — check camera for 3 IR flashes", this->ir_pin_);
+
+  this->ac_ = new IRMitsubishi136(static_cast<uint16_t>(this->ir_pin_), this->ir_inverted_);
   this->ac_->begin();
-  ESP_LOGI(TAG, "IR transmitter initialised");
+  ESP_LOGI(TAG, "IR transmitter initialised (inverted=%s)", this->ir_inverted_ ? "yes" : "no");
 
   this->mode = climate::CLIMATE_MODE_OFF;
   this->target_temperature = 24.0f;
@@ -23,6 +37,7 @@ void Mitsubishi136IRClimate::setup() {
 void Mitsubishi136IRClimate::dump_config() {
   ESP_LOGCONFIG(TAG, "Mitsubishi136 IR Climate");
   ESP_LOGCONFIG(TAG, "  IR Pin: %d", this->ir_pin_);
+  ESP_LOGCONFIG(TAG, "  Inverted: %s", this->ir_inverted_ ? "yes" : "no");
 }
 
 climate::ClimateTraits Mitsubishi136IRClimate::traits() {

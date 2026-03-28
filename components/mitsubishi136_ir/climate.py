@@ -9,6 +9,7 @@ from . import mitsubishi136_ir_ns
 AUTO_LOAD = ["climate"]
 
 CONF_IR_PIN = "ir_pin"
+CONF_IR_INVERTED = "ir_inverted"
 DEFAULT_IR_PIN = 4
 
 Mitsubishi136IRClimate = mitsubishi136_ir_ns.class_(
@@ -23,6 +24,7 @@ CONFIG_SCHEMA = (
         {
             cv.GenerateID(): cv.declare_id(Mitsubishi136IRClimate),
             cv.Optional(CONF_IR_PIN, default=DEFAULT_IR_PIN): cv.int_,
+            cv.Optional(CONF_IR_INVERTED, default=False): cv.boolean,
         }
     )
     .extend(cv.COMPONENT_SCHEMA)
@@ -33,4 +35,5 @@ async def to_code(config):
     await cg.register_component(var, config)
     await climate.register_climate(var, config)
     cg.add(var.set_ir_pin(config[CONF_IR_PIN]))
+    cg.add(var.set_ir_inverted(config[CONF_IR_INVERTED]))
     cg.add_library("crankyoldgit/IRremoteESP8266", "2.9.0")

@@ -10,6 +10,7 @@ namespace mitsubishi136_ir {
 class Mitsubishi136IRClimate : public Component, public climate::Climate {
  public:
   void set_ir_pin(int ir_pin) { this->ir_pin_ = ir_pin; }
+  void set_ir_inverted(bool inverted) { this->ir_inverted_ = inverted; }
 
   void setup() override;
   void dump_config() override;
@@ -18,6 +19,7 @@ class Mitsubishi136IRClimate : public Component, public climate::Climate {
 
  protected:
   int ir_pin_{4};
+  bool ir_inverted_{false};
   IRMitsubishi136 *ac_{nullptr};
 };
 
