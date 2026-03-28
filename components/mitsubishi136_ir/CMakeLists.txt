@@ -1,3 +1,0 @@
-idf_component_register(
-    INCLUDE_DIRS "."
-    PRIV_REQUIRES "ir_transmitter"    PRIV_REQUIRES "IRremoteESP8266")
