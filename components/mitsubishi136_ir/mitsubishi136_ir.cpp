@@ -1,16 +1,15 @@
 #include "mitsubishi136_ir.h"
 #include "esphome/core/log.h"
 
-namespace esphome {
 namespace mitsubishi136_ir {
 
 static const char *const TAG = "mitsubishi136_ir.climate";
 
 void Mitsubishi136IRClimate::setup() {
-  this->mode = climate::CLIMATE_MODE_OFF;
+  this->mode = esphome::climate::CLIMATE_MODE_OFF;
   this->target_temperature = 24.0f;
   this->current_temperature = 24.0f;
-  this->fan_mode = climate::CLIMATE_FAN_AUTO;
+  this->fan_mode = esphome::climate::CLIMATE_FAN_AUTO;
   this->publish_state();
 }
 
@@ -19,23 +18,23 @@ void Mitsubishi136IRClimate::dump_config() {
   ESP_LOGCONFIG(TAG, "  IR Pin: %d", this->ir_pin_);
 }
 
-climate::ClimateTraits Mitsubishi136IRClimate::traits() {
-  auto traits = climate::ClimateTraits();
+esphome::climate::ClimateTraits Mitsubishi136IRClimate::traits() {
+  auto traits = esphome::climate::ClimateTraits();
 
   traits.set_supports_current_temperature(true);
   traits.set_supported_modes({
-      climate::CLIMATE_MODE_OFF,
-      climate::CLIMATE_MODE_COOL,
-      climate::CLIMATE_MODE_HEAT,
-      climate::CLIMATE_MODE_DRY,
-      climate::CLIMATE_MODE_FAN_ONLY,
-      climate::CLIMATE_MODE_AUTO,
+      esphome::climate::CLIMATE_MODE_OFF,
+      esphome::climate::CLIMATE_MODE_COOL,
+      esphome::climate::CLIMATE_MODE_HEAT,
+      esphome::climate::CLIMATE_MODE_DRY,
+      esphome::climate::CLIMATE_MODE_FAN_ONLY,
+      esphome::climate::CLIMATE_MODE_AUTO,
   });
   traits.set_supported_fan_modes({
-      climate::CLIMATE_FAN_AUTO,
-      climate::CLIMATE_FAN_LOW,
-      climate::CLIMATE_FAN_MEDIUM,
-      climate::CLIMATE_FAN_HIGH,
+      esphome::climate::CLIMATE_FAN_AUTO,
+      esphome::climate::CLIMATE_FAN_LOW,
+      esphome::climate::CLIMATE_FAN_MEDIUM,
+      esphome::climate::CLIMATE_FAN_HIGH,
   });
   traits.set_visual_min_temperature(16.0f);
   traits.set_visual_max_temperature(30.0f);
@@ -44,7 +43,7 @@ climate::ClimateTraits Mitsubishi136IRClimate::traits() {
   return traits;
 }
 
-void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
+void Mitsubishi136IRClimate::control(const esphome::climate::ClimateCall &call) {
   if (call.get_mode().has_value()) {
     this->mode = *call.get_mode();
   }
@@ -61,4 +60,3 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
 }
 
 }  // namespace mitsubishi136_ir
-}  // namespace esphome
