@@ -93,7 +93,7 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
         break;
       case climate::CLIMATE_FAN_AUTO:
       default:
-        this->ac_->setFan(kMitsubishi136FanAuto);
+        this->ac_->setFan(kMitsubishi136FanMed);
         break;
     }
 
