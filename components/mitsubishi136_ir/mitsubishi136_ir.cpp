@@ -16,7 +16,7 @@ void Mitsubishi136IRClimate::setup() {
   this->mode = climate::CLIMATE_MODE_OFF;
   this->target_temperature = 24.0f;
   this->current_temperature = 24.0f;
-  this->fan_mode = 2; // climate::CLIMATE_FAN_AUTO;
+  this->fan_mode = climate::CLIMATE_FAN_AUTO;
   this->publish_state();
 }
 
@@ -93,19 +93,19 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
     }
 
     // ── Fan speed ────────────────────────────────────────────────────────
-    switch (this->fan_mode.value_or(2)) {
+    switch (this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)) {
       case climate::CLIMATE_FAN_LOW:
-        this->ac_->setFan(1);
+        this->ac_->setFan(kMitsubishi136FanMin);
         break;
       case climate::CLIMATE_FAN_MEDIUM:
-        this->ac_->setFan(2);
+        this->ac_->setFan(kMitsubishi136FanMed);
         break;
       case climate::CLIMATE_FAN_HIGH:
-        this->ac_->setFan(5);
+        this->ac_->setFan(kMitsubishi136FanMax);
         break;
       case climate::CLIMATE_FAN_AUTO:
       default:
-        this->ac_->setFan(3);
+        this->ac_->setFan(kMitsubishi136FanMed);
         break;
     }
 
