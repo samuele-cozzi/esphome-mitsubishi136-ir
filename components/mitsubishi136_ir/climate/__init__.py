@@ -11,7 +11,9 @@ CODEOWNERS = ["@samuele-cozzi"]
 
 # Declare the class as a Climate component
 Mitsubishi136IRClimate = mitsubishi136_ir_ns.class_(
-    "Mitsubishi136IRClimate", climate.Climate
+    "Mitsubishi136IRClimate",
+    climate.Climate,
+    includes=["mitsubishi136_ir/mitsubishi136_ir.h"],
 )
 
 CONF_IR_PIN = "ir_pin"
