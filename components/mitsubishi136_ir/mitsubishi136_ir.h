@@ -3,6 +3,10 @@
 #include "esphome/core/component.h"
 #include "esphome/components/climate/climate.h"
 
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Mitsubishi.h>
+
 namespace esphome {
 namespace mitsubishi136_ir {
 
@@ -17,6 +21,7 @@ class Mitsubishi136IRClimate : public Component, public climate::Climate {
 
  protected:
   int ir_pin_{4};
+  IRMitsubishi136 *ac_{nullptr};
 };
 
 }  // namespace mitsubishi136_ir

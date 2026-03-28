@@ -8,6 +8,9 @@ namespace mitsubishi136_ir {
 static const char *const TAG = "mitsubishi136_ir.climate";
 
 void Mitsubishi136IRClimate::setup() {
+  this->ac_ = new IRMitsubishi136(this->ir_pin_);
+  this->ac_->begin();
+
   this->mode = climate::CLIMATE_MODE_OFF;
   this->target_temperature = 24.0f;
   this->current_temperature = 24.0f;
@@ -44,15 +47,65 @@ climate::ClimateTraits Mitsubishi136IRClimate::traits() {
 }
 
 void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
-  if (call.get_mode().has_value()) {
+  if (call.get_mode().has_value())
     this->mode = *call.get_mode();
-  }
-  if (call.get_target_temperature().has_value()) {
+  if (call.get_target_temperature().has_value())
     this->target_temperature = *call.get_target_temperature();
-  }
-  if (call.get_fan_mode().has_value()) {
+  if (call.get_fan_mode().has_value())
     this->fan_mode = *call.get_fan_mode();
+
+  // ── Power ────────────────────────────────────────────────────────────────
+  if (this->mode == climate::CLIMATE_MODE_OFF) {
+    this->ac_->off();
+  } else {
+    this->ac_->on();
+
+    // ── Operating mode ──────────────────────────────────────────────────
+    switch (this->mode) {
+      case climate::CLIMATE_MODE_COOL:
+        this->ac_->setMode(kMitsubishi136Cool);
+        break;
+      case climate::CLIMATE_MODE_HEAT:
+        this->ac_->setMode(kMitsubishi136Heat);
+        break;
+      case climate::CLIMATE_MODE_DRY:
+        this->ac_->setMode(kMitsubishi136Dry);
+        break;
+      case climate::CLIMATE_MODE_FAN_ONLY:
+        this->ac_->setMode(kMitsubishi136Fan);
+        break;
+      case climate::CLIMATE_MODE_AUTO:
+      default:
+        this->ac_->setMode(kMitsubishi136Auto);
+        break;
+    }
+
+    // ── Fan speed ────────────────────────────────────────────────────────
+    switch (this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)) {
+      case climate::CLIMATE_FAN_LOW:
+        this->ac_->setFan(kMitsubishi136FanMin);
+        break;
+      case climate::CLIMATE_FAN_MEDIUM:
+        this->ac_->setFan(kMitsubishi136FanMed);
+        break;
+      case climate::CLIMATE_FAN_HIGH:
+        this->ac_->setFan(kMitsubishi136FanMax);
+        break;
+      case climate::CLIMATE_FAN_AUTO:
+      default:
+        this->ac_->setFan(kMitsubishi136FanAuto);
+        break;
+    }
+
+    // ── Temperature ──────────────────────────────────────────────────────
+    this->ac_->setTemp(static_cast<uint8_t>(this->target_temperature));
   }
+
+  ESP_LOGD(TAG, "Sending IR: mode=%d temp=%.1f fan=%d",
+           static_cast<int>(this->mode), this->target_temperature,
+           static_cast<int>(this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)));
+
+  this->ac_->send();
   this->publish_state();
 }
 
