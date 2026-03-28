@@ -10,7 +10,7 @@ from esphome.const import CONF_ID
 from .. import mitsubishi136_ir_ns
 
 Mitsubishi136IRClimate = mitsubishi136_ir_ns.class_(
-    "Mitsubishi136IRClimate", climate.Climate, cg.Component
+    "Mitsubishi136IRClimate", climate.Climate
 )
 
 CONF_IR_PIN = "ir_pin"
@@ -27,9 +27,6 @@ CONFIG_SCHEMA = cv.All(
 
 async def to_code(config):
     """Generate C++ code for the climate platform."""
-    # Add the include for the header file
-    cg.add_global_statement('#include "mitsubishi136_ir/mitsubishi136_ir.h"')
-    
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
     await climate.register_climate(var, config)
