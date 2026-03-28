@@ -13,11 +13,13 @@ Mitsubishi136IRClimate = mitsubishi136_ir_ns.class_(
     "Mitsubishi136IRClimate", climate.Climate, cg.Component
 )
 
-CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
-    {
-        cv.GenerateID(): cv.declare_id(Mitsubishi136IRClimate),
-    }
-).extend(cv.COMPONENT_SCHEMA)
+CONFIG_SCHEMA = cv.All(
+    climate._CLIMATE_SCHEMA.extend(
+        {
+            cv.GenerateID(): cv.declare_id(Mitsubishi136IRClimate),
+        }
+    ).extend(cv.COMPONENT_SCHEMA)
+)
 
 
 async def to_code(config):
