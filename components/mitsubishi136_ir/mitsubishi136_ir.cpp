@@ -137,6 +137,14 @@ void Mitsubishi136IRClimate::transmit_state() {
   ESP_LOGI(TAG, "Calling send() on GPIO %d", this->ir_pin_);
   //this->ac_->send();
   uint8_t *message = this->ac_->getRaw();
+
+  std::string hex_str;
+  for (uint16_t i = 0; i < kMitsubishi136StateLength; i++) {
+    char buf[4];
+    sprintf(buf, "%02X ", message[i]);
+    hex_str += buf;
+  }
+  ESP_LOGI(TAG, "Raw IR Data: %s", hex_str.c_str());
   if (this->transmitter_ != nullptr) {
     this->sendGeneric(
         kMitsubishi136HdrMark, kMitsubishi136HdrSpace,
@@ -149,6 +157,7 @@ void Mitsubishi136IRClimate::transmit_state() {
   } else {
     // Fallback if no transmitter_id was defined in yaml.
     this->ac_->send();
+    ESP_LOGI(TAG, "Fallback if no transmitter_id was defined in yaml send() completed");
   }
   ESP_LOGI(TAG, "send() completed");
 }
