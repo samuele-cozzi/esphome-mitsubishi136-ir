@@ -156,8 +156,47 @@ void Mitsubishi136IRClimate::transmit_state() {
     );
   } else {
     // Fallback if no transmitter_id was defined in yaml.
-    this->ac_->send();
-    ESP_LOGI(TAG, "Fallback if no transmitter_id was defined in yaml send() completed");
+    ESP_LOGI(TAG, "No transmitter_id provided. Using Software PWM bit-banging fallback on GPIO %d", this->ir_pin_);
+    
+    const uint32_t frequency = 38000;
+    const uint32_t half_period = 1000000 / frequency / 2;
+
+    auto mark = [&](uint32_t length) {
+      uint32_t start = micros();
+      while (micros() - start < length) {
+        digitalWrite(this->ir_pin_, HIGH);
+        delayMicroseconds(half_period);
+        digitalWrite(this->ir_pin_, LOW);
+        delayMicroseconds(half_period);
+      }
+    };
+    auto space = [&](uint32_t length) {
+      digitalWrite(this->ir_pin_, LOW);
+      delayMicroseconds(length);
+    };
+
+    pinMode(this->ir_pin_, OUTPUT);
+    digitalWrite(this->ir_pin_, LOW);
+
+    mark(kMitsubishi136HdrMark);
+    space(kMitsubishi136HdrSpace);
+    
+    for (uint16_t i = 0; i < kMitsubishi136StateLength; i++) {
+      for (uint8_t bit = 0; bit < 8; bit++) {
+        if ((message[i] >> (7 - bit)) & 1) { // MSB first
+          mark(kMitsubishi136BitMark);
+          space(kMitsubishi136OneSpace);
+        } else {
+          mark(kMitsubishi136BitMark);
+          space(kMitsubishi136ZeroSpace);
+        }
+      }
+    }
+    
+    mark(kMitsubishi136BitMark);
+    space(kMitsubishi136Gap);
+    
+    digitalWrite(this->ir_pin_, LOW);
   }
   ESP_LOGI(TAG, "send() completed");
 }
