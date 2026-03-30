@@ -136,19 +136,40 @@ void Mitsubishi136IRClimate::transmit_state() {
 
   ESP_LOGI(TAG, "Calling send() on GPIO %d", this->ir_pin_);
   //this->ac_->send();
-  message = this->ac_.getRaw();
-  sendGeneric(
-      kMitsubishi136HdrMark, kMitsubishi136HdrSpace,
-      kMitsubishi136BitMark, kMitsubishi136OneSpace,
-      kMitsubishi136BitMark, kMitsubishi136ZeroSpace,
-      kMitsubishi136BitMark, kMitsubishi136Gap,
-      message, kMitsubishi136StateLength,
-      38000
-  );
+  uint8_t *message = this->ac_->getRaw();
+  if (this->transmitter_ != nullptr) {
+    this->sendGeneric(
+        kMitsubishi136HdrMark, kMitsubishi136HdrSpace,
+        kMitsubishi136BitMark, kMitsubishi136OneSpace,
+        kMitsubishi136BitMark, kMitsubishi136ZeroSpace,
+        kMitsubishi136BitMark, kMitsubishi136Gap,
+        message, kMitsubishi136StateLength,
+        38000
+    );
+  } else {
+    // Fallback if no transmitter_id was defined in yaml.
+    this->ac_->send();
+  }
   ESP_LOGI(TAG, "send() completed");
 }
 
-void sendGeneric(
+void Mitsubishi136IRClimate::sendData(remote_base::RemoteTransmitData *data,
+                                      const uint16_t onemark, const uint32_t onespace,
+                                      const uint16_t zeromark, const uint32_t zerospace,
+                                      const uint8_t message, const uint8_t nbits) {
+  for (uint8_t i = 0; i < nbits; i++) {
+    bool bit = (message >> (nbits - 1 - i)) & 1;
+    if (bit) {
+      data->mark(onemark);
+      data->space(onespace);
+    } else {
+      data->mark(zeromark);
+      data->space(zerospace);
+    }
+  }
+}
+
+void Mitsubishi136IRClimate::sendGeneric(
     const uint16_t headermark, const uint32_t headerspace,
     const uint16_t onemark, const uint32_t onespace,
     const uint16_t zeromark, const uint32_t zerospace,
@@ -172,7 +193,7 @@ void sendGeneric(
     // Data
     for (uint16_t i = 0; i < nbytes; i++)
     {
-        sendData(data,
+        this->sendData(data,
                   onemark, onespace,
                   zeromark, zerospace,
                   *(message + i), 8);
