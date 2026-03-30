@@ -5,6 +5,14 @@
 namespace esphome {
 namespace mitsubishi136_ir {
 
+// Mitsubishi 136 bit A/C
+const uint16_t kMitsubishi136HdrMark = 3324;
+const uint16_t kMitsubishi136HdrSpace = 1474;
+const uint16_t kMitsubishi136BitMark = 467;
+const uint16_t kMitsubishi136OneSpace = 1137;
+const uint16_t kMitsubishi136ZeroSpace = 351;
+const uint32_t kMitsubishi136Gap = kDefaultMessageGap;
+
 static const char *const TAG = "mitsubishi136_ir.climate";
 
 void Mitsubishi136IRClimate::setup() {
@@ -127,8 +135,58 @@ void Mitsubishi136IRClimate::transmit_state() {
   }
 
   ESP_LOGI(TAG, "Calling send() on GPIO %d", this->ir_pin_);
-  this->ac_->send();
+  //this->ac_->send();
+  message = this->ac_.getRaw();
+  sendGeneric(
+      kMitsubishi136HdrMark, kMitsubishi136HdrSpace,
+      kMitsubishi136BitMark, kMitsubishi136OneSpace,
+      kMitsubishi136BitMark, kMitsubishi136ZeroSpace,
+      kMitsubishi136BitMark, kMitsubishi136Gap,
+      message, kMitsubishi136StateLength,
+      38000
+  );
   ESP_LOGI(TAG, "send() completed");
+}
+
+void sendGeneric(
+    const uint16_t headermark, const uint32_t headerspace,
+    const uint16_t onemark, const uint32_t onespace,
+    const uint16_t zeromark, const uint32_t zerospace,
+    const uint16_t footermark, const uint32_t gap,
+    const uint8_t *message, const uint16_t nbytes,
+    const uint16_t frequency)
+{
+    auto transmit = this->transmitter_->transmit();
+    auto *data = transmit.get_data();
+
+    data->set_carrier_frequency(frequency);
+
+    // Header
+    if (headermark)
+        data->mark(headermark);
+    else if (headerspace)
+        data->mark(1);
+    if (headerspace)
+        data->space(headerspace);
+
+    // Data
+    for (uint16_t i = 0; i < nbytes; i++)
+    {
+        sendData(data,
+                  onemark, onespace,
+                  zeromark, zerospace,
+                  *(message + i), 8);
+    }
+
+    // Footer
+    if (footermark)
+        data->mark(footermark);
+    else if (gap)
+        data->mark(1);
+    if (gap)
+        data->space(gap);
+
+    transmit.perform();
 }
 
 }  // namespace mitsubishi136_ir
