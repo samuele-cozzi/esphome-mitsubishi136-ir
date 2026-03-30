@@ -60,7 +60,12 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
   if (call.get_fan_mode().has_value())
     this->fan_mode = *call.get_fan_mode();
 
-  ESP_LOGI(TAG, "control() — mode=%d temp=%.1f fan=%d",
+  this->transmit_state();
+  this->publish_state();
+}
+
+void Mitsubishi136IRClimate::transmit_state() {
+  ESP_LOGI(TAG, "transmit_state() — mode=%d temp=%.1f fan=%d",
            static_cast<int>(this->mode), this->target_temperature,
            static_cast<int>(this->fan_mode.value_or(climate::CLIMATE_FAN_AUTO)));
 
@@ -124,8 +129,6 @@ void Mitsubishi136IRClimate::control(const climate::ClimateCall &call) {
   ESP_LOGI(TAG, "Calling send() on GPIO %d", this->ir_pin_);
   this->ac_->send();
   ESP_LOGI(TAG, "send() completed");
-
-  this->publish_state();
 }
 
 }  // namespace mitsubishi136_ir

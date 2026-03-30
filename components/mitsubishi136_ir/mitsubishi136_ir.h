@@ -18,6 +18,8 @@ class Mitsubishi136IRClimate : public Component, public climate::Climate {
   void control(const climate::ClimateCall &call) override;
 
  protected:
+  void transmit_state();
+
   int ir_pin_{4};
   bool ir_inverted_{false};
   IRMitsubishi136 *ac_{nullptr};
